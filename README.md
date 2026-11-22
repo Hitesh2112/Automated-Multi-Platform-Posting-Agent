@@ -3,7 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063.svg)](https://docs.pydantic.dev/)
-[![Tests](https://img.shields.io/badge/Tests-32%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-35%20Passed-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
 A production-grade, asynchronous REST API service built with **FastAPI** that automatically publishes short promotional and announcement messages across multiple major social, professional, forum, developer, and messaging platforms through their official APIs.
@@ -48,33 +48,39 @@ Developed in accordance with the [Chivox AI Practical Test Specification](https:
 
 ```mermaid
 flowchart TD
-    Client["Client / HTTP Request"] -->|POST /posting| FastAPI["FastAPI Application (Port 4000)"]
-    FastAPI --> Validator["Pydantic v2 Validator (Max 200 Chars, 1 CTA URL)"]
+    Client["Client / HTTP Caller"] -->|POST /posting| FastAPI["FastAPI Application (:4000)"]
+    FastAPI --> Validator["Pydantic v2 Validator<br/>(Max 200 Chars & Exactly 1 CTA URL)"]
     
     Validator -->|Invalid Input| ErrorHandler["Custom Error Handler"]
-    ErrorHandler -->|HTTP 422 JSON| Client
+    ErrorHandler --> ErrorResponse(["HTTP 422 JSON Response<br/>(Structured Error Details)"])
     
-    Validator -->|Valid Input| PostingService["PostingService (Orchestrator)"]
+    Validator -->|Valid Input| PostingService["PostingService (Orchestrator)<br/>asyncio.gather(*tasks, return_exceptions=True)"]
     
-    subgraph ConcurrentFanOut["asyncio.gather (Isolated Error Boundaries)"]
-        PostingService --> P1["Telegram Adapter"]
-        PostingService --> P2["Twitter / X Adapter"]
-        PostingService --> P3["LinkedIn Adapter"]
-        PostingService --> P4["Reddit Adapter"]
-        PostingService --> P5["GitHub Gist Adapter"]
-        PostingService --> P6["Instagram Threads Adapter"]
+    subgraph ConcurrentFanOut["Concurrent Fan-Out & Isolated Error Boundaries"]
+        direction TB
+        P1["Telegram Adapter"] -->|HTTPX Async| T1["Telegram Bot API"]
+        P2["Twitter / X Adapter"] -->|HTTPX Async| T2["Twitter API v2"]
+        P3["LinkedIn Adapter"] -->|HTTPX Async| T3["LinkedIn UGC Posts API"]
+        P4["Reddit Adapter"] -->|HTTPX Async| T4["Reddit OAuth2 API"]
+        P5["GitHub Gist Adapter"] -->|HTTPX Async| T5["GitHub Gist API"]
+        P6["Instagram Threads Adapter"] -->|HTTPX Async| T6["Meta Threads API"]
     end
     
-    P1 -->|HTTPX Async| TelegramAPI["Telegram Bot API"]
-    P2 -->|HTTPX Async| TwitterAPI["Twitter API v2"]
-    P3 -->|HTTPX Async| LinkedInAPI["LinkedIn UGC Posts API"]
-    P4 -->|HTTPX Async| RedditAPI["Reddit OAuth2 API"]
-    P5 -->|HTTPX Async| GitHubAPI["GitHub Gist API"]
-    P6 -->|HTTPX Async| ThreadsAPI["Meta Threads API"]
+    PostingService ==>|Dispatch Task| P1
+    PostingService ==>|Dispatch Task| P2
+    PostingService ==>|Dispatch Task| P3
+    PostingService ==>|Dispatch Task| P4
+    PostingService ==>|Dispatch Task| P5
+    PostingService ==>|Dispatch Task| P6
     
-    ConcurrentFanOut --> Aggregator["Result Aggregator"]
-    Aggregator --> Response["PostingResponse (HTTP 200 JSON)"]
-    Response --> Client
+    T1 ==>|PlatformResult 1| Aggregator["Result Aggregator<br/>(Collect & Evaluate)"]
+    T2 ==>|PlatformResult 2| Aggregator
+    T3 ==>|PlatformResult 3| Aggregator
+    T4 ==>|PlatformResult 4| Aggregator
+    T5 ==>|PlatformResult 5| Aggregator
+    T6 ==>|PlatformResult 6| Aggregator
+    
+    Aggregator --> SuccessResponse(["PostingResponse (HTTP 200 OK)<br/>Unified Multi-Platform JSON Payload"])
 ```
 
 ### Architectural Component Diagram
@@ -92,7 +98,7 @@ flowchart TD
 │  • Character limit check: len(message) <= 200                          │
 │  • Exactly 1 CTA URL check                                             │
 │  • URL protocol (http/https) & domain verification                     │
-│  • Clean HTTP 422 JSON on validation failure                           │
+│  • If Invalid: routes to Custom Error Handler (HTTP 422 JSON)          │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ Validated payload & CTA URL
                                     ▼
@@ -100,30 +106,43 @@ flowchart TD
 │                     PostingService (Orchestrator)                      │
 ├────────────────────────────────────────────────────────────────────────┤
 │  Asynchronous Fan-Out: asyncio.gather(*tasks, return_exceptions=True)  │
-│  Isolated Error Boundaries (Failures on one platform do not block others)│
+│  Shared Lifespan HTTPX AsyncClient Connection Pool                     │
 └─────┬───────────┬────────────┬───────────┬────────────┬───────────┬────┘
       │           │            │           │            │           │
       ▼           ▼            ▼           ▼            ▼           ▼
  ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐
  │Telegram │ │Twitter/X│  │LinkedIn │ │ Reddit  │  │ GitHub  │ │ Threads │
  │ Adapter │ │ Adapter │  │ Adapter │ │ Adapter │  │ Adapter │ │ Adapter │
- └────┬────┘ └────┬────┘  └────┬────┘ └────┬────┘  └────┬────┘ └────┬────┘
-      │           │            │           │            │           │
-      │ HTTPX     │ HTTPX      │ HTTPX     │ HTTPX      │ HTTPX     │ HTTPX
-      ▼           ▼            ▼           ▼            ▼           ▼
+ │(Isolated│ │(Isolated│  │(Isolated│ │(Isolated│  │(Isolated│ │(Isolated│
+ │Boundary)│ │Boundary)│  │Boundary)│ │Boundary)│  │Boundary)│ │Boundary)│
+ └────▲─┬──┘ └────▲─┬──┘  └────▲─┬──┘ └────▲─┬──┘  └────▲─┬──┘ └────▲─┬──┘
+      │ │         │ │          │ │         │ │          │ │         │ │
+ Resp │ │ Req Resp│ │ Req  Resp│ │ Req Resp│ │ Req  Resp│ │ Req Resp│ │ Req
+      │ ▼         │ ▼          │ ▼         │ ▼          │ ▼         │ ▼
  ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐
  │Telegram │ │Twitter  │  │LinkedIn │ │ Reddit  │  │ GitHub  │ │  Meta   │
  │ Bot API │ │ API v2  │  │ UGC API │ │ OAuth2  │  │Gists API│ │ Threads │
  └─────────┘ └─────────┘  └─────────┘ └─────────┘  └─────────┘ └─────────┘
       │           │            │           │            │           │
-      └───────────┴────────────┼───────────┴────────────┴───────────┘
-                               │ Aggregated PlatformResults
-                               ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   PostingResponse (HTTP 200 JSON)                      │
-│   • success: true / false                                              │
-│   • results: [ { platform, status, posted_url, public_access, ... } ]  │
-└────────────────────────────────────────────────────────────────────────┘
+      ▼           ▼            ▼           ▼            ▼           ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                   Result Aggregator (asyncio.gather)                   │
+ │   • Collects 6 isolated PlatformResult records                         │
+ │   • Evaluates overall status: success = any(status == 'success')       │
+ │   • Dual-Sink Logging (ANSI Color Console + logs/app.log)              │
+ └───────────────────────────────────┬────────────────────────────────────┘
+                                     │
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                   PostingResponse (HTTP 200 JSON)                      │
+ │   • success: true / false                                              │
+ │   • results: [ { platform, status, posted_url, public_access, ... } ]  │
+ └───────────────────────────────────┬────────────────────────────────────┘
+                                     │ HTTP 200 OK
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                        HTTP Client / Evaluator                         │
+ └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -137,7 +156,7 @@ We identified, researched, and integrated **6 diverse, industry-leading platform
 | **Telegram** | Messaging / Broadcast | `POST https://api.telegram.org/bot<token>/sendMessage` | Bot Token | `https://t.me/<channel>/<message_id>` |
 | **Twitter / X** | Microblogging / Social | `POST https://api.twitter.com/2/tweets` | OAuth 2.0 Bearer Token | `https://x.com/i/web/status/<tweet_id>` |
 | **LinkedIn** | Professional Network | `POST https://api.linkedin.com/v2/ugcPosts` | OAuth 2.0 Bearer Token | `https://www.linkedin.com/feed/update/<urn>` |
-| **Reddit** | Community / Forums | `POST https://oauth.reddit.com/api/submit` | OAuth 2.0 Password Grant | `https://reddit.com/r/<sub/comments/<id>/` |
+| **Reddit** | Community / Forums | `POST https://oauth.reddit.com/api/submit` | OAuth 2.0 Password Grant | `https://reddit.com/r/<subreddit>/comments/<id>/` |
 | **GitHub Gist** | Developer Portal | `POST https://api.github.com/gists` | Personal Access Token | `https://gist.github.com/<user>/<gist_id>` |
 | **Instagram Threads** | Social Conversation | `POST https://graph.threads.net/v1.0/<user>/threads` | Meta Graph API Bearer Token | `https://www.threads.net/@post/<thread_id>` |
 

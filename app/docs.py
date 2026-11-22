@@ -383,6 +383,184 @@ DOCS_HTML = r"""<!DOCTYPE html>
       color: var(--primary-light);
     }
 
+    /* Architecture Visual Workflow Diagram */
+    .arch-workflow-diagram {
+      margin-top: 2.25rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+    .arch-diagram-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .arch-diagram-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .arch-flow-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem;
+      background: rgba(11, 15, 25, 0.65);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.25rem;
+    }
+    .arch-node-box {
+      border-radius: 12px;
+      padding: 1.1rem 1.6rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .arch-node-box:hover {
+      transform: translateY(-2px);
+    }
+    .arch-client-node {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      text-align: center;
+      min-width: 320px;
+      max-width: 580px;
+      width: 100%;
+    }
+    .arch-gateway-node {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      width: 100%;
+      max-width: 820px;
+    }
+    .arch-orchestrator-node {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      width: 100%;
+      max-width: 860px;
+      text-align: center;
+    }
+    .arch-lanes-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.85rem;
+      width: 100%;
+      margin: 0.4rem 0;
+    }
+    @media (max-width: 1150px) {
+      .arch-lanes-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 680px) {
+      .arch-lanes-row { grid-template-columns: 1fr; }
+    }
+    .arch-lane-box {
+      background: rgba(18, 24, 38, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.65rem;
+      transition: all 0.25s ease;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .arch-lane-box:hover {
+      border-color: var(--primary-light);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      background: rgba(28, 36, 56, 0.95);
+    }
+    .arch-lane-head {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .arch-iso-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .arch-endpoint-pill {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.4rem 0.55rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--secondary);
+      word-break: break-all;
+    }
+    .arch-aggregator-node {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      width: 100%;
+      max-width: 860px;
+      text-align: center;
+    }
+    .arch-response-node {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      text-align: center;
+      min-width: 340px;
+      max-width: 580px;
+      width: 100%;
+    }
+    .arch-connector-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+    .arch-connector-arrow .arrow-symbol {
+      font-size: 1.25rem;
+      color: var(--primary-light);
+    }
+    .arch-split-branches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      text-align: left;
+    }
+    .arch-pass-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: var(--success);
+    }
+    .arch-fail-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: var(--danger);
+    }
+    .arch-highlight {
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.4) !important;
+      transform: scale(1.02);
+    }
+
     /* Playground */
     .playground-grid {
       display: grid;
@@ -872,6 +1050,207 @@ DOCS_HTML = r"""<!DOCTYPE html>
             The client submits a clean JSON payload containing only <code>{"message": "..."}</code>. Platform selection is strictly handled internally by the application, fulfilling the requirement for internal routing without exposing platform flags to the client.
           </p>
         </div>
+
+        <!-- Architectural Workflow Map -->
+        <div class="arch-workflow-diagram">
+          <div class="arch-diagram-title">
+            <span>🗺️ Visual Architectural Flow &amp; Execution Topology</span>
+          </div>
+          <div class="arch-diagram-desc">
+            End-to-end data flow topology showing parallel fan-out, independent error boundaries, official platform endpoints, and unified result aggregation. Click any node or lane to inspect.
+          </div>
+
+          <div class="arch-flow-wrapper">
+            <!-- 1. Client HTTP Caller -->
+            <div id="arch-node-client" class="arch-node-box arch-client-node" onclick="selectStep('req', null)">
+              <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--secondary); font-weight: 700; margin-bottom: 0.25rem;">
+                Inbound Trigger
+              </div>
+              <div style="font-weight: 800; font-size: 1.05rem;">HTTP Client / Evaluator</div>
+              <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">
+                POST http://localhost:4000/posting
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 0.72rem; background: rgba(0,0,0,0.4); padding: 0.3rem 0.6rem; border-radius: 6px; margin-top: 0.4rem; color: var(--text-muted);">
+                {"message": "Check out our latest platform... https://example.com"}
+              </div>
+            </div>
+
+            <!-- Arrow Down -->
+            <div class="arch-connector-arrow">
+              <span class="arrow-symbol">↓</span>
+              <span>FastAPI Router receives request</span>
+            </div>
+
+            <!-- 2. FastAPI Gateway & Pydantic Validation Gate -->
+            <div id="arch-node-gateway" class="arch-node-box arch-gateway-node" onclick="selectStep('val', null)">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary-light); font-weight: 700;">
+                  Validation Layer
+                </span>
+                <span class="rule-tag" style="background: rgba(99,102,241,0.2); color: var(--primary-light);">Pydantic v2 Gate</span>
+              </div>
+              <div style="font-weight: 800; font-size: 1.05rem;">FastAPI App &amp; Strict Input Validator (:4000)</div>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Zero network I/O until rules pass: Message length ≤ 200 characters &bull; Exactly 1 CTA URL &bull; Scheme (http/https) &amp; domain syntax
+              </p>
+
+              <div class="arch-split-branches">
+                <div class="arch-fail-box">
+                  <strong>❌ If Validation Fails:</strong><br>
+                  Bypasses all platforms immediately. Custom Error Handler returns standardized <code>HTTP 422 Unprocessable Content</code> JSON.
+                </div>
+                <div class="arch-pass-box">
+                  <strong>✅ If Validation Passes:</strong><br>
+                  Dispatches sanitized announcement message &amp; validated CTA link directly to the concurrent orchestrator.
+                </div>
+              </div>
+            </div>
+
+            <!-- Arrow Down -->
+            <div class="arch-connector-arrow">
+              <span class="arrow-symbol">↓</span>
+              <span>Validated payload passed to Orchestrator</span>
+            </div>
+
+            <!-- 3. PostingService (Asynchronous Orchestrator) -->
+            <div id="arch-node-orchestrator" class="arch-node-box arch-orchestrator-node" onclick="selectStep('fan', null)">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--success); font-weight: 700;">
+                  Concurrency Engine
+                </span>
+                <span class="rule-tag" style="background: rgba(16,185,129,0.2); color: var(--success);">asyncio.gather(*tasks)</span>
+              </div>
+              <div style="font-weight: 800; font-size: 1.05rem;">PostingService &bull; Shared Lifespan HTTPX AsyncClient Pool</div>
+              <p style="font-size: 0.83rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Fans out concurrently to all 6 platform adapters in parallel. Latency = Max(t_platform) &lt; 500ms rather than serial cumulative delay.
+              </p>
+            </div>
+
+            <!-- Arrow Down -->
+            <div class="arch-connector-arrow">
+              <span class="arrow-symbol">↓↓↓↓↓↓</span>
+              <span>Concurrent Fan-Out across 6 Isolated Platform Lanes</span>
+            </div>
+
+            <!-- 4. 6 Platform Execution Lanes -->
+            <div class="arch-lanes-row">
+              <!-- Lane 1: Telegram -->
+              <div class="arch-lane-box" onclick="selectStep('iso', null)">
+                <div class="arch-lane-head">
+                  <span>✈️</span>
+                  <span>Telegram</span>
+                </div>
+                <span class="arch-iso-pill">🛡️ Isolated try/catch</span>
+                <div class="arch-endpoint-pill">POST /bot&lt;token&gt;/sendMessage</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">
+                  Permalinks: <code>t.me/channel/id</code>
+                </div>
+              </div>
+
+              <!-- Lane 2: Twitter / X -->
+              <div class="arch-lane-box" onclick="selectStep('iso', null)">
+                <div class="arch-lane-head">
+                  <span>🐦</span>
+                  <span>Twitter / X</span>
+                </div>
+                <span class="arch-iso-pill">🛡️ Isolated try/catch</span>
+                <div class="arch-endpoint-pill">POST /2/tweets</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">
+                  Permalinks: <code>x.com/user/status/id</code>
+                </div>
+              </div>
+
+              <!-- Lane 3: LinkedIn -->
+              <div class="arch-lane-box" onclick="selectStep('iso', null)">
+                <div class="arch-lane-head">
+                  <span>💼</span>
+                  <span>LinkedIn</span>
+                </div>
+                <span class="arch-iso-pill">🛡️ Isolated try/catch</span>
+                <div class="arch-endpoint-pill">POST /v2/ugcPosts</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">
+                  Permalinks: <code>feed/update/urn</code>
+                </div>
+              </div>
+
+              <!-- Lane 4: Reddit -->
+              <div class="arch-lane-box" onclick="selectStep('iso', null)">
+                <div class="arch-lane-head">
+                  <span>🤖</span>
+                  <span>Reddit</span>
+                </div>
+                <span class="arch-iso-pill">🛡️ Isolated try/catch</span>
+                <div class="arch-endpoint-pill">POST /api/submit</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">
+                  Permalinks: <code>reddit.com/r/sub/...</code>
+                </div>
+              </div>
+
+              <!-- Lane 5: GitHub Gist -->
+              <div class="arch-lane-box" onclick="selectStep('iso', null)">
+                <div class="arch-lane-head">
+                  <span>🐙</span>
+                  <span>GitHub Gist</span>
+                </div>
+                <span class="arch-iso-pill">🛡️ Isolated try/catch</span>
+                <div class="arch-endpoint-pill">POST /gists</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">
+                  Permalinks: <code>gist.github.com/user/id</code>
+                </div>
+              </div>
+
+              <!-- Lane 6: Meta Threads -->
+              <div class="arch-lane-box" onclick="selectStep('iso', null)">
+                <div class="arch-lane-head">
+                  <span>🧵</span>
+                  <span>Meta Threads</span>
+                </div>
+                <span class="arch-iso-pill">🛡️ Isolated try/catch</span>
+                <div class="arch-endpoint-pill">POST /threads</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);">
+                  Permalinks: <code>threads.net/@post/id</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Arrow Down -->
+            <div class="arch-connector-arrow">
+              <span class="arrow-symbol">↑↑↑↑↑↑</span>
+              <span>All 6 PlatformResult objects collected (No uncaught exceptions)</span>
+            </div>
+
+            <!-- 5. Result Aggregator & Dual-Sink Logger -->
+            <div id="arch-node-aggregator" class="arch-node-box arch-aggregator-node" onclick="selectStep('agg', null)">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--warning); font-weight: 700;">
+                  Result Aggregator &amp; Observability
+                </span>
+                <span class="rule-tag" style="background: rgba(245,158,11,0.2); color: var(--warning);">Dual-Sink Logging</span>
+              </div>
+              <div style="font-weight: 800; font-size: 1.05rem;">Unified Result Aggregation &amp; Telemetry</div>
+              <p style="font-size: 0.83rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Evaluates overall success: <code>success = any(status == 'success')</code> &bull; Logs ANSI colorized audit badges to console &bull; Rotates persistent structured entries in <code>logs/app.log</code>
+              </p>
+            </div>
+
+            <!-- Arrow Down -->
+            <div class="arch-connector-arrow">
+              <span class="arrow-symbol">↓</span>
+              <span>Returns HTTP 200 JSON Response</span>
+            </div>
+
+            <!-- 6. Response Output -->
+            <div id="arch-node-response" class="arch-node-box arch-response-node" onclick="selectStep('agg', null)">
+              <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--success); font-weight: 700; margin-bottom: 0.25rem;">
+                Standardized Output (HTTP 200 OK)
+              </div>
+              <div style="font-weight: 800; font-size: 1.05rem;">PostingResponse Payload</div>
+              <div style="font-family: var(--font-mono); font-size: 0.72rem; background: rgba(0,0,0,0.4); padding: 0.4rem 0.6rem; border-radius: 6px; margin-top: 0.4rem; color: var(--text-muted); text-align: left;">
+                { "success": true, "results": [ { "platform": "Telegram", "status": "success", "posted_url": "...", "public_access": true, "date": "...", "time": "..." }, ... ] }
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1320,11 +1699,33 @@ DOCS_HTML = r"""<!DOCTYPE html>
 
     function selectStep(step, ev) {
       document.querySelectorAll('.pipeline-step').forEach(el => el.classList.remove('active'));
-      ev.currentTarget.classList.add('active');
+      const stepIndex = { 'req': 0, 'val': 1, 'fan': 2, 'iso': 3, 'agg': 4 }[step];
+      const stepElements = document.querySelectorAll('.pipeline-step');
+      if (stepElements[stepIndex]) {
+        stepElements[stepIndex].classList.add('active');
+      }
+
       const data = stepDetails[step];
-      document.getElementById('detail-title').textContent = data.title;
-      document.getElementById('detail-badge').textContent = data.badge;
-      document.getElementById('detail-desc').textContent = data.desc;
+      if (data) {
+        document.getElementById('detail-title').textContent = data.title;
+        document.getElementById('detail-badge').textContent = data.badge;
+        document.getElementById('detail-desc').textContent = data.desc;
+      }
+
+      // Synchronize visual highlighting across the architecture workflow diagram
+      document.querySelectorAll('.arch-node-box, .arch-lane-box').forEach(el => el.classList.remove('arch-highlight'));
+      if (step === 'req') {
+        document.getElementById('arch-node-client')?.classList.add('arch-highlight');
+      } else if (step === 'val') {
+        document.getElementById('arch-node-gateway')?.classList.add('arch-highlight');
+      } else if (step === 'fan') {
+        document.getElementById('arch-node-orchestrator')?.classList.add('arch-highlight');
+      } else if (step === 'iso') {
+        document.querySelectorAll('.arch-lane-box').forEach(el => el.classList.add('arch-highlight'));
+      } else if (step === 'agg') {
+        document.getElementById('arch-node-aggregator')?.classList.add('arch-highlight');
+        document.getElementById('arch-node-response')?.classList.add('arch-highlight');
+      }
     }
 
     // Interactive Playground Logic
