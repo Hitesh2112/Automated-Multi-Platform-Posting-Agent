@@ -19,7 +19,9 @@ from app.platforms.twitter import TwitterPlatform
 class TestPlatformAdapters:
     """Test suite for the 6 individual platform adapters."""
 
-    async def test_telegram_unconfigured_auth_failure(self, disable_mock_mode, async_http_client):
+    async def test_telegram_unconfigured_auth_failure(self, disable_mock_mode, async_http_client, monkeypatch):
+        monkeypatch.setattr(settings, "TELEGRAM_BOT_TOKEN", None)
+        monkeypatch.setattr(settings, "TELEGRAM_CHAT_ID", None)
         platform = TelegramPlatform()
         result = await platform.post("Test message https://example.com", "https://example.com", async_http_client)
         assert result.status == "failed"
@@ -142,7 +144,8 @@ class TestPlatformAdapters:
         assert result.status == "success"
         assert "reddit.com" in result.posted_url
 
-    async def test_github_unconfigured_auth_failure(self, disable_mock_mode, async_http_client):
+    async def test_github_unconfigured_auth_failure(self, disable_mock_mode, async_http_client, monkeypatch):
+        monkeypatch.setattr(settings, "GITHUB_ACCESS_TOKEN", None)
         platform = GitHubPlatform()
         result = await platform.post("Gist https://example.com", "https://example.com", async_http_client)
         assert result.status == "failed"

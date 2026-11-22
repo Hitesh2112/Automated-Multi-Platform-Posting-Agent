@@ -32,7 +32,16 @@ class TestPostingEndpoint:
             assert item["time"] is not None
             assert item["error"] is None
 
-    def test_posting_unconfigured_auth_failure_matches_spec(self, client: TestClient, disable_mock_mode):
+    def test_posting_unconfigured_auth_failure_matches_spec(self, client: TestClient, disable_mock_mode, monkeypatch):
+        monkeypatch.setattr(settings, "TELEGRAM_BOT_TOKEN", None)
+        monkeypatch.setattr(settings, "TELEGRAM_CHAT_ID", None)
+        monkeypatch.setattr(settings, "GITHUB_ACCESS_TOKEN", None)
+        monkeypatch.setattr(settings, "TWITTER_BEARER_TOKEN", None)
+        monkeypatch.setattr(settings, "TWITTER_ACCESS_TOKEN", None)
+        monkeypatch.setattr(settings, "LINKEDIN_ACCESS_TOKEN", None)
+        monkeypatch.setattr(settings, "REDDIT_CLIENT_ID", None)
+        monkeypatch.setattr(settings, "THREADS_ACCESS_TOKEN", None)
+
         payload = {
             "message": "Check out our latest business platform and grow your online visibility. https://example.com"
         }

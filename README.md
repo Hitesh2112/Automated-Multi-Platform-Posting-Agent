@@ -21,8 +21,7 @@ Developed in accordance with the [Chivox AI Practical Test Specification](https:
 - [Custom Error Handling](#custom-error-handling)
 - [Project Structure](#project-structure)
 - [Installation & Quickstart](#installation--quickstart)
-- [Configuration & Environment Variables](#configuration--environment-variables)
-- [Running the Server](#running-the-server)
+- [API Keys Setup Guide (Testing Live APIs)](./API_KEYS_SETUP_GUIDE.md)
 - [Interactive API Documentation](#interactive-api-documentation)
 - [Sample Requests & Responses](#sample-requests--responses)
 - [Running the Test Suite](#running-the-test-suite)
@@ -45,17 +44,19 @@ Developed in accordance with the [Chivox AI Practical Test Specification](https:
 
 ## System Architecture
 
+### Visual Architectural Flowchart
+
 ```mermaid
 flowchart TD
-    Client["Client / HTTP Request"] -->|POST /posting| FastAPI["FastAPI Application (:4000)"]
-    FastAPI --> Validator["Pydantic v2 Validator<br/>(Len <= 200, Exactly 1 CTA URL)"]
+    Client["Client / HTTP Request"] -->|POST /posting| FastAPI["FastAPI Application (Port 4000)"]
+    FastAPI --> Validator["Pydantic v2 Validator (Max 200 Chars, 1 CTA URL)"]
     
     Validator -->|Invalid Input| ErrorHandler["Custom Error Handler"]
     ErrorHandler -->|HTTP 422 JSON| Client
     
     Validator -->|Valid Input| PostingService["PostingService (Orchestrator)"]
     
-    subgraph Concurrent Fan-Out ["asyncio.gather (Isolated Error Boundaries)"]
+    subgraph ConcurrentFanOut["asyncio.gather (Isolated Error Boundaries)"]
         PostingService --> P1["Telegram Adapter"]
         PostingService --> P2["Twitter / X Adapter"]
         PostingService --> P3["LinkedIn Adapter"]
@@ -71,9 +72,58 @@ flowchart TD
     P5 -->|HTTPX Async| GitHubAPI["GitHub Gist API"]
     P6 -->|HTTPX Async| ThreadsAPI["Meta Threads API"]
     
-    Concurrent Fan-Out --> Aggregator["Result Aggregator"]
+    ConcurrentFanOut --> Aggregator["Result Aggregator"]
     Aggregator --> Response["PostingResponse (HTTP 200 JSON)"]
     Response --> Client
+```
+
+### Architectural Component Diagram
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        HTTP Client / Evaluator                         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ POST http://localhost:4000/posting
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                        FastAPI Server (:4000)                          │
+├────────────────────────────────────────────────────────────────────────┤
+│  Validation Layer (Pydantic v2):                                       │
+│  • Character limit check: len(message) <= 200                          │
+│  • Exactly 1 CTA URL check                                             │
+│  • URL protocol (http/https) & domain verification                     │
+│  • Clean HTTP 422 JSON on validation failure                           │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Validated payload & CTA URL
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                     PostingService (Orchestrator)                      │
+├────────────────────────────────────────────────────────────────────────┤
+│  Asynchronous Fan-Out: asyncio.gather(*tasks, return_exceptions=True)  │
+│  Isolated Error Boundaries (Failures on one platform do not block others)│
+└─────┬───────────┬────────────┬───────────┬────────────┬───────────┬────┘
+      │           │            │           │            │           │
+      ▼           ▼            ▼           ▼            ▼           ▼
+ ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐
+ │Telegram │ │Twitter/X│  │LinkedIn │ │ Reddit  │  │ GitHub  │ │ Threads │
+ │ Adapter │ │ Adapter │  │ Adapter │ │ Adapter │  │ Adapter │ │ Adapter │
+ └────┬────┘ └────┬────┘  └────┬────┘ └────┬────┘  └────┬────┘ └────┬────┘
+      │           │            │           │            │           │
+      │ HTTPX     │ HTTPX      │ HTTPX     │ HTTPX      │ HTTPX     │ HTTPX
+      ▼           ▼            ▼           ▼            ▼           ▼
+ ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐  ┌─────────┐ ┌─────────┐
+ │Telegram │ │Twitter  │  │LinkedIn │ │ Reddit  │  │ GitHub  │ │  Meta   │
+ │ Bot API │ │ API v2  │  │ UGC API │ │ OAuth2  │  │Gists API│ │ Threads │
+ └─────────┘ └─────────┘  └─────────┘ └─────────┘  └─────────┘ └─────────┘
+      │           │            │           │            │           │
+      └───────────┴────────────┼───────────┴────────────┴───────────┘
+                               │ Aggregated PlatformResults
+                               ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   PostingResponse (HTTP 200 JSON)                      │
+│   • success: true / false                                              │
+│   • results: [ { platform, status, posted_url, public_access, ... } ]  │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -198,31 +248,28 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
----
+### 4. Configure Environment & API Credentials
 
-## Configuration & Environment Variables
-
-Copy the provided `.env.example` file to create your local `.env`:
+Copy the provided environment template:
 
 ```bash
 cp .env.example .env
 ```
 
-### Evaluation & Mock Mode
+Select your operational mode inside `.env`:
 
-To test all platforms immediately without configuring real API keys, set:
+- **Option A: Instant Evaluation / Mock Mode (Recommended for quick testing)**:
+  Set `MOCK_MODE=true` in `.env`. The system simulates realistic successful responses across all platforms without requiring external developer accounts.
+- **Option B: Real-World Live API Testing**:
+  Set `MOCK_MODE=false` in `.env` and provide credentials for the platforms you wish to test. Any platform without credentials will return `status: "failed"` with `Authentication failed: Missing API credentials` per specification.
 
-```env
-MOCK_MODE=true
-```
+> [!TIP]
+> **Detailed API Key Setup Guide**:
+> If you wish to test real live posting, follow our comprehensive walkthrough in **[API_KEYS_SETUP_GUIDE.md](./API_KEYS_SETUP_GUIDE.md)** for step-by-step instructions on obtaining free, instant credentials for **Telegram** (2 mins), **GitHub Gist** (1 min), **Reddit** (3 mins), **Twitter / X**, **LinkedIn**, and **Instagram Threads**.
 
-To test real API authentication and credentials, set `MOCK_MODE=false` and fill in credentials for the platforms you wish to test. Any platform without credentials will return `status: "failed"` with `Authentication failed: Missing API credentials`.
+### 5. Start the Server
 
----
-
-## Running the Server
-
-Start the application with Uvicorn on port 4000:
+Launch the application with Uvicorn on port 4000:
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 4000 --reload
@@ -232,10 +279,13 @@ uvicorn app.main:app --host 0.0.0.0 --port 4000 --reload
 
 ## Interactive API Documentation
 
-Once the server is running, explore and test the API using the interactive Swagger UI:
+Once the server is running, explore and test the API using our interactive documentation interfaces:
 
-- **Swagger UI**: [http://localhost:4000/docs](http://localhost:4000/docs)
+- **Interactive Visual Docs & Playground**: [http://localhost:4000/docs](http://localhost:4000/docs) (Modern visual storytelling, live in-browser testing playground, real-time validation, and concurrency architecture visualizer)
+- **Dedicated API Setup Guide Page**: [http://localhost:4000/api-guide](http://localhost:4000/api-guide) (Full step-by-step instructions for obtaining credentials across all 6 platforms)
+- **Standard Swagger UI**: [http://localhost:4000/swagger](http://localhost:4000/swagger)
 - **ReDoc**: [http://localhost:4000/redoc](http://localhost:4000/redoc)
+- **OpenAPI Schema**: [http://localhost:4000/openapi.json](http://localhost:4000/openapi.json)
 - **Health Check**: [http://localhost:4000/health](http://localhost:4000/health)
 
 ---

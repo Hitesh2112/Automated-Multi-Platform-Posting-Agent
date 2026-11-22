@@ -41,3 +41,21 @@ class TestErrorHandlers:
         assert data["status"] == "healthy"
         assert "platforms_count" in data
         assert data["platforms_count"] >= 5
+
+    def test_interactive_visual_docs_endpoint(self, client: TestClient):
+        response = client.get("/docs")
+        assert response.status_code == 200
+        assert "text/html" in response.headers.get("content-type", "")
+        assert "Multi-Platform Posting System" in response.text
+        assert "Interactive Live API Playground" in response.text
+
+    def test_swagger_ui_endpoint(self, client: TestClient):
+        response = client.get("/swagger")
+        assert response.status_code == 200
+        assert "text/html" in response.headers.get("content-type", "")
+
+    def test_api_guide_page_endpoint(self, client: TestClient):
+        response = client.get("/api-guide")
+        assert response.status_code == 200
+        assert "text/html" in response.headers.get("content-type", "")
+        assert "API Keys Setup Guide" in response.text

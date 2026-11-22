@@ -20,4 +20,6 @@ htmlcov/
 .vscode/
 .idea/
 .DS_Store
+# Logs directory & log files
+logs/
 *.log

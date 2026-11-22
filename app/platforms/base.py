@@ -42,12 +42,13 @@ class BasePlatform(ABC):
         Public posting entry point with unified error isolation,
         credential checking, and mock fallback.
         """
-        # If credentials are not configured
-        if not self.is_configured():
-            if settings.MOCK_MODE:
-                logger.info("[%s] Running in MOCK_MODE (no credentials configured)", self.platform_name)
-                return self._generate_mock_result(message, cta_url)
+        # If MOCK_MODE is enabled, always return simulated realistic success results
+        if settings.MOCK_MODE:
+            logger.info("[%s] Running in MOCK_MODE (simulated execution)", self.platform_name)
+            return self._generate_mock_result(message, cta_url)
 
+        # If credentials are not configured and not in mock mode, return authentication failure
+        if not self.is_configured():
             logger.warning("[%s] API credentials not configured in environment", self.platform_name)
             return self._failure_result("Authentication failed: Missing API credentials")
 
